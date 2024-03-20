@@ -1,6 +1,9 @@
 import pickle
 import numpy as np
 import tensorflow as tf
+from dynesty import NestedSampler
+from dynesty import utils as dyfunc
+import scipy
 
 class InversePCA(tf.keras.layers.Layer):
     """
@@ -107,3 +110,36 @@ class emulator:
 
         outputs = 10**log_outputs
         return outputs
+
+class ns():
+    def __init__(self, priors, observed_vals, observed_unc, pitchfork):
+        self.priors = priors
+        self.obs_val = observed_vals
+        self.obs_unc = observed_unc
+        self.ndim = len(priors)
+        self.pitchfork = pitchfork
+    
+    def ptform(self, u):
+
+        theta = np.array([self.priors[i].ppf(u[i])[0] for i in range(self.ndim)])
+        return theta
+        
+    
+    def logl(self, theta, logl_scale=0.001): 
+        m = np.array(self.pitchfork.predict(np.array([theta])))
+        
+        ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc)
+        
+        return logl_scale*np.sum(ll)
+    
+    def __call__(self, nlive=500):
+        self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
+                                bound='multi', sample='rwalk')
+        self.sampler.run_nested()
+        self.results = self.sampler.results
+        
+        samples, weights = self.results.samples, np.exp(self.results.logwt - self.results.logz[-1])
+        
+        self.post_samples = dyfunc.resample_equal(samples, weights)
+        
+        return self.post_samples
