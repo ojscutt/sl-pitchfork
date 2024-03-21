@@ -125,16 +125,16 @@ class ns():
         return theta
         
     
-    def logl(self, theta, logl_scale=0.001): 
+    def logl(self, theta, logl_scale=1): 
         m = np.array(self.pitchfork.predict(np.array([theta])))
         
         ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc)
         
         return logl_scale*np.sum(ll)
     
-    def __call__(self, nlive=500):
+    def __call__(self, nlive=100):
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
-                                bound='multi', sample='rwalk')
+                                bound='multi', sample='unif')
         self.sampler.run_nested()
         self.results = self.sampler.results
         
