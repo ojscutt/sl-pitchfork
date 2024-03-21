@@ -1,0 +1,2 @@
+model_checkpoint_path: "trash_model_weights"
+all_model_checkpoint_paths: "trash_model_weights"

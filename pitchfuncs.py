@@ -132,9 +132,9 @@ class ns():
         
         return logl_scale*np.sum(ll)
     
-    def __call__(self, nlive=100):
+    def __call__(self, nlive=20000):
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
-                                bound='multi', sample='unif')
+                                bound='multi', sample='rwalk')
         self.sampler.run_nested()
         self.results = self.sampler.results
         
