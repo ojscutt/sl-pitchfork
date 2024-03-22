@@ -1,6 +1,10 @@
 import pickle
 import numpy as np
 import tensorflow as tf
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 from dynesty import NestedSampler
 from dynesty import utils as dyfunc
 import scipy
@@ -102,7 +106,7 @@ class emulator:
         
         standardised_log_inputs = (log_inputs - log_inputs_mean)/log_inputs_std
 
-        standardised_log_outputs = self.model.predict(standardised_log_inputs, verbose=verbose)
+        standardised_log_outputs = self.model(standardised_log_inputs)
 
         standardised_log_outputs = np.concatenate((np.array(standardised_log_outputs[0]),np.array(standardised_log_outputs[1])), axis=1)
 
@@ -132,9 +136,9 @@ class ns():
         
         return logl_scale*np.sum(ll)
     
-    def __call__(self, nlive=20000):
+    def __call__(self, nlive=500):
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
-                                bound='multi', sample='rwalk')
+                                bound='multi', sample='unif')
         self.sampler.run_nested()
         self.results = self.sampler.results
         
