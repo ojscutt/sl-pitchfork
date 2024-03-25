@@ -125,20 +125,21 @@ class ns():
     
     def ptform(self, u):
 
-        theta = np.array([self.priors[i].ppf(u[i])[0] for i in range(self.ndim)])
+        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])
         return theta
         
     
     def logl(self, theta, logl_scale=1): 
-        m = np.array(self.pitchfork.predict(np.array([theta])))
+        m = self.pitchfork.predict(np.array([theta]))
         
-        ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc)
+        ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
         
-        return logl_scale*np.sum(ll)
+        return logl_scale * ll
     
     def __call__(self, nlive=500):
+        print(nlive)
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
-                                bound='multi', sample='unif')
+                                bound='multi', sample='rwalk')
         self.sampler.run_nested()
         self.results = self.sampler.results
         
