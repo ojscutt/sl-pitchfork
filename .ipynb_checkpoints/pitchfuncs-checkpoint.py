@@ -125,7 +125,7 @@ class ns():
     
     def ptform(self, u):
 
-        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])
+        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])[:,0]
         return theta
         
     
@@ -137,7 +137,6 @@ class ns():
         return logl_scale * ll
     
     def __call__(self, nlive=500):
-        print(nlive)
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
                                 bound='multi', sample='rwalk')
         self.sampler.run_nested()
