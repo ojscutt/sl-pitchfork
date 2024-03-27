@@ -124,21 +124,18 @@ class ns():
         self.pitchfork = pitchfork
     
     def ptform(self, u):
-
-        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])
+        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])[:,0]
         return theta
         
     
     def logl(self, theta, logl_scale=1): 
         m = self.pitchfork.predict(np.array([theta]))
         m = np.concatenate((m[:,:3],m[:,15:25]), axis=1)
-        
         ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
         
         return logl_scale * ll
     
-    def __call__(self, nlive=2000):
-        print(nlive)
+    def __call__(self, nlive=1000):
         self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
                                 bound='multi', sample='rwalk')
         self.sampler.run_nested()
