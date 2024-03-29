@@ -125,12 +125,12 @@ class ns():
     
     def ptform(self, u):
 
-        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])[:,0]
+        theta = np.array([self.priors[i].ppf(u[i]) for i in range(self.ndim)])
         return theta
         
     
     def logl(self, theta, logl_scale=1): 
-        m = self.pitchfork.predict(np.array([theta]))
+        m = self.pitchfork.predict([theta])
         
         ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
         
