@@ -128,12 +128,13 @@ class emulator:
         return outputs
 
 class ns():
-    def __init__(self, priors, observed_vals, observed_unc, pitchfork):
+    def __init__(self, priors, observed_vals, observed_unc, pitchfork, logl_scale = 1):
         self.priors = priors
         self.obs_val = observed_vals
         self.obs_unc = observed_unc
         self.ndim = len(priors)
         self.pitchfork = pitchfork
+        self.logl_scale = logl_scale
     
     def ptform(self, u):
 
@@ -141,16 +142,14 @@ class ns():
         return theta
         
     
-    def logl(self, theta, logl_scale=1): 
+    def logl(self, theta): 
         m = self.pitchfork.predict([theta])
-        
         ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
         
-        return logl_scale * ll
+        return self.logl_scale * ll
     
     def __call__(self, nlive=500, bound='multi', sample='rwalk'):
-        self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive,  
-                                bound=bound, sample=sample)
+        self.sampler = NestedSampler(self.logl, self.ptform, self.ndim, nlive=nlive, bound=bound, sample=sample)
         self.sampler.run_nested()
         self.results = self.sampler.results
         
