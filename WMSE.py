@@ -1,3 +1,6 @@
+import tensorflow as tf
+import numpy as np
+
 class WMSE(tf.keras.losses.Loss):
     """
     Weighted Mean Squared Error Loss Function for tensorflow neural network
