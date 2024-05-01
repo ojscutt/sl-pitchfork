@@ -116,15 +116,15 @@ class emulator:
 
         outputs = 10**log_outputs
 
-        outputs[0][2] = log_outputs[0][2] ##we want star_feh in dex
+        outputs[:,2] = log_outputs[:,2] ##we want star_feh in dex
 
         # def calc_Teff(luminosity, radius):
         #     return np.array(((luminosity.values*astropy.constants.L_sun) / (4*np.pi*constants.sigma*((radius.values*astropy.constants.R_sun)**2)))**0.25)
 
 
-        teff = np.array(((outputs[0][1]*astropy.constants.L_sun) / (4*np.pi*constants.sigma*((outputs[0][0]*astropy.constants.R_sun)**2)))**0.25)
+        teff = np.array(((outputs[:,1]*astropy.constants.L_sun) / (4*np.pi*constants.sigma*((outputs[:,0]*astropy.constants.R_sun)**2)))**0.25)
         
-        outputs[0][0] = teff
+        outputs[:,0] = teff
         return outputs
 
 class ns():
