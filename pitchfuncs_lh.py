@@ -9,6 +9,7 @@ from dynesty import NestedSampler
 from dynesty import utils as dyfunc
 import scipy
 from scipy import constants
+from scipy import stats
 import astropy.constants
 
 class InversePCA(tf.keras.layers.Layer):
@@ -126,15 +127,16 @@ class emulator:
         
         outputs[:,0] = teff
         return outputs
-
+        
 class ns():
-    def __init__(self, priors, observed_vals, observed_unc, pitchfork, logl_scale = 1):
+    def __init__(self, priors, observed_vals, observed_unc, pitchfork, sigma, sigma_inv, logl_scale = 1):
         self.priors = priors
         self.obs_val = observed_vals
         self.obs_unc = observed_unc
         self.ndim = len(priors)
         self.pitchfork = pitchfork
         self.logl_scale = logl_scale
+        self.sigma_cov = stats.Covariance.from_precision(sigma_inv, covariance=sigma)
     
     def ptform(self, u):
 
@@ -143,8 +145,11 @@ class ns():
         
     
     def logl(self, theta): 
-        m = self.pitchfork.predict([theta])
-        ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
+        m = self.pitchfork.predict([theta])[0]
+        
+        #ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
+
+        ll = scipy.stats.multivariate_normal.logpdf(m, mean=self.obs_val, cov=self.sigma_cov)
         
         return self.logl_scale * ll
     
