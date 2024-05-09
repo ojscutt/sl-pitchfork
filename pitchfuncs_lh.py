@@ -150,6 +150,7 @@ class ns():
         #ll = scipy.stats.norm.logpdf(m, loc = self.obs_val, scale = self.obs_unc).sum()
 
         ll = scipy.stats.multivariate_normal.logpdf(m, mean=self.obs_val, cov=self.sigma_cov)
+
         
         return self.logl_scale * ll
     
