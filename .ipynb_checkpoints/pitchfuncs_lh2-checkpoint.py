@@ -86,7 +86,7 @@ class emulator:
     def __init__(self, emulator_name):
         self.emulator_name = emulator_name
         self.file_path = "pickle jar/"+ self.emulator_name
-
+        
         with open(self.file_path+".pkl", 'rb') as fp:
              self.emulator_dict = pickle.load(fp)
             
@@ -96,7 +96,10 @@ class emulator:
 
         [print(str(key).replace("log_","") + " range: " + "[min = " + str(self.emulator_dict['parameter_ranges'][key]["min"]) + ", max = " + str(self.emulator_dict['parameter_ranges'][key]["max"]) + "]") for key in self.emulator_dict['parameter_ranges'].keys()];
 
-    def predict(self, input_data,verbose=False):
+    def predict(self, input_data, n_min=6, n_max=40, verbose=False):
+        self.n_min = n_min
+        self.n_max = n_max
+        
         log_inputs_mean = np.array(self.emulator_dict["data_scaling"]["inp_mean"][0])
         
         log_inputs_std = np.array(self.emulator_dict["data_scaling"]["inp_std"][0])
@@ -126,18 +129,22 @@ class emulator:
         teff = np.array(((outputs[:,1]*astropy.constants.L_sun) / (4*np.pi*constants.sigma*((outputs[:,0]*astropy.constants.R_sun)**2)))**0.25)
         
         outputs[:,0] = teff
+
+        outputs = np.concatenate((np.array(outputs[:,:3]), np.array(outputs[:,self.n_min-3:self.n_max-2])), axis=1)
+
         return outputs
         
 class ns():
-    def __init__(self, priors, observed_vals, observed_unc, pitchfork, sigma_det, sigma_inv, logl_scale = 1):
+    def __init__(self, priors, observed_vals, pitchfork, sigma_det, sigma_inv, n_min=6, n_max=40, logl_scale = 1):
         self.priors = priors
         self.obs_val = observed_vals
-        self.obs_unc = observed_unc
         self.ndim = len(priors)
         self.pitchfork = pitchfork
         self.logl_scale = logl_scale
         self.sigma_det = sigma_det
         self.sigma_inv = sigma_inv
+        self.n_min = n_min
+        self.n_max = n_max
     
     def ptform(self, u):
 
@@ -146,7 +153,7 @@ class ns():
         
     
     def logl(self, theta): 
-        m = self.pitchfork.predict([theta])[0]
+        m = self.pitchfork.predict([theta], n_min=self.n_min, n_max=self.n_max)[0]
 
         residual_matrix = np.matrix(m-self.obs_val)
 
