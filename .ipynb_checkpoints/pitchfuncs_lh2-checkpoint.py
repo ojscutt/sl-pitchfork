@@ -129,7 +129,7 @@ class emulator:
         teff = np.array(((outputs[:,1]*astropy.constants.L_sun) / (4*np.pi*constants.sigma*((outputs[:,0]*astropy.constants.R_sun)**2)))**0.25)
         
         outputs[:,0] = teff
-
+        
         outputs = np.concatenate((np.array(outputs[:,:3]), np.array(outputs[:,self.n_min-3:self.n_max-2])), axis=1)
 
         return outputs
