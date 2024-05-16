@@ -97,8 +97,6 @@ class emulator:
         [print(str(key).replace("log_","") + " range: " + "[min = " + str(self.emulator_dict['parameter_ranges'][key]["min"]) + ", max = " + str(self.emulator_dict['parameter_ranges'][key]["max"]) + "]") for key in self.emulator_dict['parameter_ranges'].keys()];
 
     def predict(self, input_data, n_min=6, n_max=40, verbose=False):
-        self.n_min = n_min
-        self.n_max = n_max
         
         log_inputs_mean = np.array(self.emulator_dict["data_scaling"]["inp_mean"][0])
         
@@ -130,7 +128,7 @@ class emulator:
         
         outputs[:,0] = teff
         
-        outputs = np.concatenate((np.array(outputs[:,:3]), np.array(outputs[:,self.n_min-3:self.n_max-2])), axis=1)
+        outputs = np.concatenate((np.array(outputs[:,:3]), np.array(outputs[:,n_min-3:n_max-2])), axis=1)
 
         return outputs
         
